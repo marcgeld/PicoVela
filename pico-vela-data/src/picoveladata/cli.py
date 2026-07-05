@@ -18,7 +18,7 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from picoveladata.convert import convert_to_csv, list_traces
+from picoveladata.convert import convert_to_csv, list_traces, trace_to_dataframe
 from picoveladata.fetch import KNOWN_EVENTS, fetch_event
 from picoveladata.preprocess import preprocess as preprocess_waveform
 
@@ -150,17 +150,7 @@ def preprocess(
         processed_dir = Path(processed_dir)
         processed_dir.mkdir(parents=True, exist_ok=True)
 
-        import numpy as np
-        import pandas as pd
-
-        trace = stream[0]
-        dt = 1.0 / trace.stats.sampling_rate
-        times = np.arange(trace.stats.npts) * dt
-        df = pd.DataFrame({
-            "time_seconds": np.round(times, 6),
-            "amplitude": trace.data,
-        })
-
+        df = trace_to_dataframe(stream[0])
         stem = mseed.stem
         out_path = processed_dir / f"{stem}_preprocessed.csv"
         df.to_csv(out_path, index=False)

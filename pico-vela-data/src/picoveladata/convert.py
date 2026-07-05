@@ -78,13 +78,7 @@ def convert_to_csv(
         trace.id, trace.stats.sampling_rate, trace.stats.npts,
     )
 
-    dt = 1.0 / trace.stats.sampling_rate
-    times = np.arange(trace.stats.npts) * dt
-
-    df = pd.DataFrame({
-        "time_seconds": np.round(times, time_precision),
-        "amplitude": trace.data.astype(np.int64),
-    })
+    df = trace_to_dataframe(trace, time_precision=time_precision)
 
     stem = mseed_path.stem
     out_path = processed_dir / f"{stem}.csv"
@@ -92,6 +86,33 @@ def convert_to_csv(
 
     logger.info("Saved CSV → %s  (%d rows)", out_path, len(df))
     return out_path.resolve()
+
+
+def trace_to_dataframe(trace: "obspy.Trace", time_precision: int = 6) -> pd.DataFrame:  # type: ignore[name-defined]
+    """Convert an ObsPy Trace to a two-column DataFrame.
+
+    This is the shared helper used by both :func:`convert_to_csv` and the
+    ``preprocess`` CLI command to ensure consistent output format.
+
+    Parameters
+    ----------
+    trace:
+        An :class:`obspy.Trace` whose data will be exported.
+    time_precision:
+        Number of decimal places for the ``time_seconds`` column.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame with columns ``time_seconds`` and ``amplitude``.
+        The ``amplitude`` column preserves the original ``trace.data`` dtype.
+    """
+    dt = 1.0 / trace.stats.sampling_rate
+    times = np.arange(trace.stats.npts) * dt
+    return pd.DataFrame({
+        "time_seconds": np.round(times, time_precision),
+        "amplitude": trace.data,
+    })
 
 
 def list_traces(mseed_path: str | Path) -> list[str]:

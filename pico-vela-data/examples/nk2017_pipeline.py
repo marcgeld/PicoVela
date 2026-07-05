@@ -20,7 +20,7 @@ from pathlib import Path
 
 from obspy import read as obspy_read
 
-from picoveladata.convert import convert_to_csv
+from picoveladata.convert import convert_to_csv, trace_to_dataframe
 from picoveladata.fetch import fetch_event
 from picoveladata.preprocess import preprocess
 
@@ -38,24 +38,16 @@ stream = obspy_read(str(mseed_path))
 preprocess(stream, remove_mean=True, detrend=True, normalize=True)
 print(f"  → {stream[0].stats.npts} samples, normalised")
 
-# 3. Export preprocessed CSV directly
-import numpy as np
-import pandas as pd
-
-trace = stream[0]
-dt = 1.0 / trace.stats.sampling_rate
-times = np.arange(trace.stats.npts) * dt
-df = pd.DataFrame({
-    "time_seconds": np.round(times, 6),
-    "amplitude": trace.data,
-})
+# 3. Export preprocessed CSV using the shared helper
+print("Step 3: Exporting preprocessed CSV …")
+df = trace_to_dataframe(stream[0])
 out_csv = Path("data/processed") / f"{mseed_path.stem}_preprocessed.csv"
 out_csv.parent.mkdir(parents=True, exist_ok=True)
 df.to_csv(out_csv, index=False)
 print(f"  → {out_csv.resolve()}  ({len(df)} rows)")
 
 # 4. Alternatively, convert the raw miniSEED without preprocessing
-print("Step 3: Converting raw miniSEED to CSV (no preprocessing) …")
+print("Step 4: Converting raw miniSEED to CSV (no preprocessing) …")
 raw_csv = convert_to_csv(mseed_path, processed_dir=Path("data/processed"))
 print(f"  → {raw_csv}")
 
