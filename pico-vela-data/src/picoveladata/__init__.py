@@ -5,7 +5,7 @@ Responsibilities:
   - Download historical waveform data from public FDSN archives.
   - Extract samples from miniSEED files.
   - Perform minimal preprocessing (mean removal, detrend, normalise, trim).
-  - Export simple CSV files (time_seconds, amplitude) for Swift ingestion.
+  - Export timestamped CSV files and station-aware timelines for Swift ingestion.
 
 All numerical analysis (FFT, spectral analysis, classification) is left to
 the Swift project PicoVela / SwiftNumerica.

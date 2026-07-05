@@ -68,7 +68,7 @@ def fetch(
     channel: Annotated[Optional[str], typer.Option("--channel", "-C", help="SEED channel code.")] = None,
     starttime: Annotated[Optional[str], typer.Option("--starttime", help="UTC start time (ISO-8601).")] = None,
     endtime: Annotated[Optional[str], typer.Option("--endtime", help="UTC end time (ISO-8601).")] = None,
-    client: Annotated[str, typer.Option("--client", help="FDSN client name (e.g. IRIS, GEOFON).")] = "IRIS",
+    client: Annotated[str, typer.Option("--client", help="FDSN client name (e.g. EARTHSCOPE, GEOFON).")] = "EARTHSCOPE",
     raw_dir: _raw_dir_option = Path("data/raw"),
 ) -> None:
     """Download waveform data for a known event or an explicit time window.
@@ -104,7 +104,7 @@ def convert(
     trace_index: Annotated[int, typer.Option("--trace-index", "-t", help="Index of the trace to export.")] = 0,
     list_only: Annotated[bool, typer.Option("--list-traces", help="Print trace IDs and exit without converting.")] = False,
 ) -> None:
-    """Convert a miniSEED file to a two-column CSV (time_seconds, amplitude)."""
+    """Convert a miniSEED file to a timestamped waveform CSV."""
     if list_only:
         ids = list_traces(mseed)
         for i, tid in enumerate(ids):
@@ -150,7 +150,7 @@ def preprocess(
         processed_dir = Path(processed_dir)
         processed_dir.mkdir(parents=True, exist_ok=True)
 
-        df = trace_to_dataframe(stream[0])
+        df = trace_to_dataframe(stream[0], source_file=mseed.name)
         stem = mseed.stem
         out_path = processed_dir / f"{stem}_preprocessed.csv"
         df.to_csv(out_path, index=False)
@@ -170,4 +170,6 @@ def events() -> None:
             f"               {info['network']}.{info['station']} "
             f"{info['channel']}  {info['starttime']} → {info['endtime']}"
         )
+        if "notes" in info:
+            typer.echo(f"               note: {info['notes']}")
         typer.echo()
