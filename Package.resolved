@@ -1,0 +1,15 @@
+{
+  "originHash" : "71013eb3440d580f12539ce6dcc1cf771b7e9bcac1b299ba580d020929e8548a",
+  "pins" : [
+    {
+      "identity" : "swiftnumerica",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/marcgeld/SwiftNumerica.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e4e56a1b5dc55e3c127571b96e49770b4d7cefd5"
+      }
+    }
+  ],
+  "version" : 3
+}
